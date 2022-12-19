@@ -38,7 +38,7 @@ List the class(es) that `App.java` provides that are **not** dependencies of oth
 
 List the class(es) that `App.java` provides that **are** dependencies of other classes
 
-* 
+* DynamoDBMapper, 
 
 List the class(es) that `App.java` creates that have constructors we must annotate with `@Inject`
 
@@ -60,29 +60,31 @@ your module, `DaoModule`, as indicated below. Use these names in
 your implementation as well)
 
 ```
-@______
-@______(______ = {______.class})
+@Singleton
+@Component(modules = {DaoModule.class})
 public interface ServiceComponent {
-    ______ provide______();
+    CreatePlaylistActivity provideCreatePlaylistActivity();
 
-    ______ provide______();
+    GetPlaylistActivity provideGetPlaylistActivity();
 
-    ______ provide______();
+    UpdatePlaylistActivity provideUpdatePlaylistActivity();
 
-    ______ provide______();
+    AddSongToPlaylistActivity provideAddSongToPlaylistActivity();
 
-    ______ provide______();
+    GetPlaylistSongsActivity provideGetPlaylistSongsActivity();
 }
 ```
 
 ```
-@______
+@Module
 public class DaoModule {
 
-    @______
-    @______
-    public ______ provide______() {
+    @Singleton
+    @Provides
+    public PlaylistDao providePlaylistDao() {
         // Implementation in milestone 2
+    }
+    public AlbumTrackDao provideAlbumTrackDao() {
     }
 }
 ```

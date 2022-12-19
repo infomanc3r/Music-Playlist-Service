@@ -58,6 +58,15 @@ class PlaylistNotFoundException {
 
 }
 
+class InvalidAttributeChangeException {
+
+}
+
+class AttributeRelatedException {
+
+}
+
+
 Playlist -- AlbumTrack
 AddSongToPlaylistActivity -- AlbumTrackDao
 CreatePlaylistActivity -- PlaylistDao
@@ -66,6 +75,8 @@ GetPlaylistActivity -- PlaylistDao
 GetPlaylistSongsActivity -- PlaylistDao
 UpdatePlaylistActivity -- PlaylistDao
 
+AttributeRelatedException <|-- InvalidAttributeChangeException
+AttributeRelatedException <|-- InvalidAttributeValueException
 
 
 @enduml

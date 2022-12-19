@@ -1,17 +1,26 @@
 package com.amazon.ata.music.playlist.service.activity;
 
+import com.amazon.ata.music.playlist.service.dynamodb.models.AlbumTrack;
+import com.amazon.ata.music.playlist.service.dynamodb.models.Playlist;
+import com.amazon.ata.music.playlist.service.exceptions.AlbumTrackNotFoundException;
+import com.amazon.ata.music.playlist.service.exceptions.PlaylistNotFoundException;
 import com.amazon.ata.music.playlist.service.models.requests.AddSongToPlaylistRequest;
 import com.amazon.ata.music.playlist.service.models.results.AddSongToPlaylistResult;
 import com.amazon.ata.music.playlist.service.models.SongModel;
 import com.amazon.ata.music.playlist.service.dynamodb.AlbumTrackDao;
 import com.amazon.ata.music.playlist.service.dynamodb.PlaylistDao;
+import com.amazon.ata.music.playlist.service.converters.ModelConverter;
 
+import com.amazon.ata.music.playlist.service.util.MusicPlaylistServiceUtils;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Implementation of the AddSongToPlaylistActivity for the MusicPlaylistService's AddSongToPlaylist API.
@@ -29,6 +38,7 @@ public class AddSongToPlaylistActivity implements RequestHandler<AddSongToPlayli
      * @param playlistDao PlaylistDao to access the playlist table.
      * @param albumTrackDao AlbumTrackDao to access the album_track table.
      */
+    @Inject
     public AddSongToPlaylistActivity(PlaylistDao playlistDao, AlbumTrackDao albumTrackDao) {
         this.playlistDao = playlistDao;
         this.albumTrackDao = albumTrackDao;
@@ -53,8 +63,27 @@ public class AddSongToPlaylistActivity implements RequestHandler<AddSongToPlayli
     public AddSongToPlaylistResult handleRequest(final AddSongToPlaylistRequest addSongToPlaylistRequest, Context context) {
         log.info("Received AddSongToPlaylistRequest {} ", addSongToPlaylistRequest);
 
+        if(playlistDao.getPlaylist(addSongToPlaylistRequest.getId()) == null) {
+            throw new PlaylistNotFoundException("Playlist with that id not found!");
+        }
+
+        if(albumTrackDao.getAlbumTrack(addSongToPlaylistRequest.getAsin(), addSongToPlaylistRequest.getTrackNumber()) == null) {
+            throw new AlbumTrackNotFoundException("AlbumTrack with that asin and track number not found!");
+        }
+
+        AlbumTrack albumTrackToAdd = albumTrackDao.getAlbumTrack(addSongToPlaylistRequest.getAsin(), addSongToPlaylistRequest.getTrackNumber());
+        Playlist pList = playlistDao.getPlaylist(addSongToPlaylistRequest.getId());
+        pList.getSongList().add(albumTrackDao.getAlbumTrack(addSongToPlaylistRequest.getAsin(), addSongToPlaylistRequest.getTrackNumber()));
+        playlistDao.savePlaylist(pList);
+
+        List<AlbumTrack> workingSongList = pList.getSongList();
+        List<SongModel> workingSongModelList = new ArrayList<>();
+        for(AlbumTrack track : workingSongList){
+            workingSongModelList.add(ModelConverter.toSongModel(track));
+        }
+
         return AddSongToPlaylistResult.builder()
-                .withSongList(Collections.singletonList(new SongModel()))
+                .withSongList(workingSongModelList)
                 .build();
     }
 }

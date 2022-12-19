@@ -63,11 +63,11 @@ public class AddSongToPlaylistActivity implements RequestHandler<AddSongToPlayli
     public AddSongToPlaylistResult handleRequest(final AddSongToPlaylistRequest addSongToPlaylistRequest, Context context) {
         log.info("Received AddSongToPlaylistRequest {} ", addSongToPlaylistRequest);
 
-        if(playlistDao.getPlaylist(addSongToPlaylistRequest.getId()) == null) {
+        if (playlistDao.getPlaylist(addSongToPlaylistRequest.getId()) == null) {
             throw new PlaylistNotFoundException("Playlist with that id not found!");
         }
 
-        if(albumTrackDao.getAlbumTrack(addSongToPlaylistRequest.getAsin(), addSongToPlaylistRequest.getTrackNumber()) == null) {
+        if (albumTrackDao.getAlbumTrack(addSongToPlaylistRequest.getAsin(), addSongToPlaylistRequest.getTrackNumber()) == null) {
             throw new AlbumTrackNotFoundException("AlbumTrack with that asin and track number not found!");
         }
 
